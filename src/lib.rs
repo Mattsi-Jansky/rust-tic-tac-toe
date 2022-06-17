@@ -5,22 +5,25 @@ enum Cell {
 }
 
 struct TicTacToeGame {
-    state: [Cell; 9]
+    state: [Cell; 9],
+    is_first_player_turn: bool
 }
 
 impl TicTacToeGame {
     pub fn new() -> TicTacToeGame {
-            TicTacToeGame { state: [
-                Cell::None,
-                Cell::None,
-                Cell::None,
-                Cell::None,
-                Cell::None,
-                Cell::None,
-                Cell::None,
-                Cell::None,
-                Cell::None,
-            ]
+            TicTacToeGame {
+                state: [
+                    Cell::None,
+                    Cell::None,
+                    Cell::None,
+                    Cell::None,
+                    Cell::None,
+                    Cell::None,
+                    Cell::None,
+                    Cell::None,
+                    Cell::None,
+                ],
+                is_first_player_turn: true
         }
     }
 
@@ -40,8 +43,12 @@ impl TicTacToeGame {
         result
     }
 
-    pub fn make_move(&mut self, p0: i32, p1: i32) {
-        self.state[0] = Cell::Nort;
+    pub fn make_move(&mut self, x: usize, y: usize) {
+        self.state[x] = match self.is_first_player_turn {
+            true => Cell::Nort,
+            false => Cell::Cross
+        };
+        self.is_first_player_turn = !self.is_first_player_turn
     }
 }
 
@@ -70,6 +77,21 @@ mod tests {
         let actual = game.display();
         assert_eq!(
             concat!("O  \n","   \n","   "),
+            actual
+        )
+    }
+
+    #[test]
+    fn second_move_should_place_o_on_screen() {
+        let mut game = TicTacToeGame::new();
+
+        game.make_move(0,0);
+        game.make_move(1,0);
+
+
+        let actual = game.display();
+        assert_eq!(
+            concat!("OX \n","   \n","   "),
             actual
         )
     }
