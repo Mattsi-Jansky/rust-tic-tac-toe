@@ -1,24 +1,27 @@
-#[derive(Clone,Copy)]
+#[derive(Clone,Copy,Debug)]
 enum Cell {
     Nort,
     Cross,
     None
 }
 
+#[derive(Debug)]
 enum MoveResult {
     Ongoing(Game),
-    IllegalMove
+    IllegalMove,
+    WinFirstPlayer(String)
 }
 
 impl MoveResult {
     fn unwrap(self) -> Game {
         match self {
             MoveResult::Ongoing(game) => { game }
-            MoveResult::IllegalMove => { panic!("Cannot play after illegal move") }
+            _ => { panic!("Cannot play from this state") }
         }
     }
 }
 
+#[derive(Debug)]
 struct Game {
     state: [Cell; 9],
     is_first_player_turn: bool
@@ -43,19 +46,7 @@ impl Game {
     }
 
     pub fn display(&self) -> String {
-        let mut result = String::new();
-
-        for (i, cell) in self.state.iter().enumerate() {
-            result.push_str(match cell {
-                Cell::Nort => "O",
-                Cell::Cross => "X",
-                Cell::None => " "
-            });
-
-            if (i + 1) % 3 == 0 && i < 8 { result.push_str("\n")};
-        }
-
-        result
+        render_state(self.state)
     }
 
     pub fn make_move(&self, x: usize, y: usize) -> MoveResult {
@@ -65,14 +56,40 @@ impl Game {
                 true => Cell::Nort,
                 false => Cell::Cross
             };
-            MoveResult::Ongoing(Game {
-                state,
-                is_first_player_turn: !self.is_first_player_turn
-            })
+            if is_win_state(state) {
+                MoveResult::WinFirstPlayer(render_state(state))
+            }
+            else {
+                MoveResult::Ongoing(Game {
+                    state,
+                    is_first_player_turn: !self.is_first_player_turn
+                })
+            }
         } else {
             MoveResult::IllegalMove
         }
     }
+}
+
+fn is_win_state(state: [Cell; 9]) -> bool {
+    if matches!(state[0], Cell::Nort) && matches!(state[1], Cell::Nort) && matches!(state[2], Cell::Nort) {true}
+    else {false}
+}
+
+fn render_state(state: [Cell; 9]) -> String {
+    let mut result = String::new();
+
+    for (i, cell) in state.iter().enumerate() {
+        result.push_str(match cell {
+            Cell::Nort => "O",
+            Cell::Cross => "X",
+            Cell::None => " "
+        });
+
+        if (i + 1) % 3 == 0 && i < 8 { result.push_str("\n")};
+    }
+
+    result
 }
 
 #[cfg(test)]
@@ -139,5 +156,23 @@ mod tests {
         let result = game.make_move(0,0);
 
         assert!(matches!(result, MoveResult::IllegalMove))
+    }
+
+    #[test]
+    fn win_first_player_horizontal() {
+        let mut game = Game::new();
+
+        game = game.make_move(0,0).unwrap();
+        game = game.make_move(0,1).unwrap();
+        game = game.make_move(1,0).unwrap();
+        game = game.make_move(1,1).unwrap();
+        let result = game.make_move(2,0);
+
+        if let MoveResult::WinFirstPlayer(display) = result {
+            assert_eq!(
+                concat!("OOO\n","XX \n","   "),
+                display
+            )
+        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
     }
 }
