@@ -44,7 +44,7 @@ impl TicTacToeGame {
     }
 
     pub fn make_move(&mut self, x: usize, y: usize) {
-        self.state[x] = match self.is_first_player_turn {
+        self.state[x + (y * 3)] = match self.is_first_player_turn {
             true => Cell::Nort,
             false => Cell::Cross
         };
@@ -92,6 +92,19 @@ mod tests {
         let actual = game.display();
         assert_eq!(
             concat!("OX \n","   \n","   "),
+            actual
+        )
+    }
+
+    #[test]
+    fn move_on_second_row() {
+        let mut game = TicTacToeGame::new();
+
+        game.make_move(0,1);
+
+        let actual = game.display();
+        assert_eq!(
+            concat!("   \n","O  \n","   "),
             actual
         )
     }
