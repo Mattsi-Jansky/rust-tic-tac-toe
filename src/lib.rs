@@ -1,17 +1,32 @@
+#[derive(Clone,Copy)]
 enum Cell {
     Nort,
     Cross,
     None
 }
 
-struct TicTacToeGame {
+enum MoveResult {
+    Ongoing(Game),
+    IllegalMove
+}
+
+impl MoveResult {
+    fn unwrap(self) -> Game {
+        match self {
+            MoveResult::Ongoing(game) => { game }
+            MoveResult::IllegalMove => { panic!("Cannot play after illegal move") }
+        }
+    }
+}
+
+struct Game {
     state: [Cell; 9],
     is_first_player_turn: bool
 }
 
-impl TicTacToeGame {
-    pub fn new() -> TicTacToeGame {
-            TicTacToeGame {
+impl Game {
+    pub fn new() -> Game {
+            Game {
                 state: [
                     Cell::None,
                     Cell::None,
@@ -43,12 +58,20 @@ impl TicTacToeGame {
         result
     }
 
-    pub fn make_move(&mut self, x: usize, y: usize) {
-        self.state[x + (y * 3)] = match self.is_first_player_turn {
-            true => Cell::Nort,
-            false => Cell::Cross
-        };
-        self.is_first_player_turn = !self.is_first_player_turn
+    pub fn make_move(&self, x: usize, y: usize) -> MoveResult {
+        let mut state = self.state;
+        if matches!(state[x + (y * 3)], Cell::None) {
+            state[x + (y * 3)] = match self.is_first_player_turn {
+                true => Cell::Nort,
+                false => Cell::Cross
+            };
+            MoveResult::Ongoing(Game {
+                state,
+                is_first_player_turn: !self.is_first_player_turn
+            })
+        } else {
+            MoveResult::IllegalMove
+        }
     }
 }
 
@@ -58,7 +81,7 @@ mod tests {
 
     #[test]
     fn should_render_blank_board() {
-        let game = TicTacToeGame::new();
+        let game = Game::new();
 
         let actual = game.display();
 
@@ -70,9 +93,9 @@ mod tests {
 
     #[test]
     fn first_move_should_place_x_on_screen() {
-        let mut game = TicTacToeGame::new();
+        let mut game = Game::new();
 
-        game.make_move(0,0);
+        game = game.make_move(0,0).unwrap();
 
         let actual = game.display();
         assert_eq!(
@@ -83,11 +106,10 @@ mod tests {
 
     #[test]
     fn second_move_should_place_o_on_screen() {
-        let mut game = TicTacToeGame::new();
+        let mut game = Game::new();
 
-        game.make_move(0,0);
-        game.make_move(1,0);
-
+        game = game.make_move(0,0).unwrap();
+        game = game.make_move(1,0).unwrap();
 
         let actual = game.display();
         assert_eq!(
@@ -98,14 +120,24 @@ mod tests {
 
     #[test]
     fn move_on_second_row() {
-        let mut game = TicTacToeGame::new();
+        let mut game = Game::new();
 
-        game.make_move(0,1);
+        game = game.make_move(0,1).unwrap();
 
         let actual = game.display();
         assert_eq!(
             concat!("   \n","O  \n","   "),
             actual
         )
+    }
+
+    #[test]
+    fn cannot_play_in_position_already_played_in() {
+        let mut game = Game::new();
+
+        game = game.make_move(0,0).unwrap();
+        let result = game.make_move(0,0);
+
+        assert!(matches!(result, MoveResult::IllegalMove))
     }
 }
