@@ -9,7 +9,8 @@ enum Cell {
 enum MoveResult {
     Ongoing(Game),
     IllegalMove,
-    WinFirstPlayer(String)
+    WinFirstPlayer(String),
+    WinSecondPlayer(String)
 }
 
 impl MoveResult {
@@ -175,4 +176,41 @@ mod tests {
             )
         } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
     }
+
+    #[test]
+    fn win_first_player_horizontal_second_row() {
+        let mut game = Game::new();
+
+        game = game.make_move(0,1).unwrap();
+        game = game.make_move(0,0).unwrap();
+        game = game.make_move(1,1).unwrap();
+        game = game.make_move(1,0).unwrap();
+        let result = game.make_move(2,1);
+
+        if let MoveResult::WinFirstPlayer(display) = result {
+            assert_eq!(
+                concat!("XX \n","OOO\n","   "),
+                display
+            )
+        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+    }
+
+    // #[test]
+    // fn win_second_player_horizontal() {
+    //     let mut game = Game::new();
+    //
+    //     game = game.make_move(0,0).unwrap();
+    //     game = game.make_move(0,1).unwrap();
+    //     game = game.make_move(1,0).unwrap();
+    //     game = game.make_move(1,1).unwrap();
+    //     game = game.make_move(2,2).unwrap();
+    //     let result = game.make_move(2,1);
+    //
+    //     if let MoveResult::WinSecondPlayer(display) = result {
+    //         assert_eq!(
+    //             concat!("OO \n","XXX\n","  O"),
+    //             display
+    //         )
+    //     } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+    // }
 }
