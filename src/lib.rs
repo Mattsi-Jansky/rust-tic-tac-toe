@@ -73,8 +73,16 @@ impl Game {
 }
 
 fn is_win_state(state: [Cell; 9]) -> bool {
-    if matches!(state[0], Cell::Nort) && matches!(state[1], Cell::Nort) && matches!(state[2], Cell::Nort) {true}
-    else {false}
+    let mut result = false;
+
+    for i in 0..2 {
+        let row = i * 3;
+        if matches!(state[0 + row], Cell::Nort) && matches!(state[1 + row], Cell::Nort) && matches!(state[2 + row], Cell::Nort) {
+            result = true;
+        }
+    }
+
+    result
 }
 
 fn render_state(state: [Cell; 9]) -> String {
