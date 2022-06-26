@@ -1,13 +1,14 @@
 use std::io;
 use tic_tac_toe::{Game, MoveResult};
+use tic_tac_toe::MoveResult::Draw;
 
 fn main() {
     let mut game = Game::new();
     let mut result = MoveResult::Ongoing(Default::default());
     println!("{}", game.render());
 
-    while !matches!(result, MoveResult::WinFirstPlayer(_))
-        && !matches!(result, MoveResult::WinSecondPlayer(_)) {
+    while matches!(result, MoveResult::Ongoing(_)) || matches!(result, MoveResult::IllegalMove)  {
+        println!("{}", game.render());
         let mut input = String::new();
         match io::stdin().read_line(&mut input) {
             Ok(n) => {
@@ -26,18 +27,16 @@ fn main() {
 
         if let MoveResult::Ongoing(new_game) = result {
             game = new_game;
-        } else {
+        } else if matches!(result, MoveResult::IllegalMove) {
             println!("Illegal move. Use format `x,y` eg `0,0` (zero-indexed)")
         }
-
-        println!("{}", game.render());
     }
 
-    print!("Game over. ");
+    println!("===Game over===");
     match result {
-        MoveResult::WinFirstPlayer(_) => { println!("First player (O) wins!") }
-        MoveResult::WinSecondPlayer(_) => { println!("Second player (X) wins! ")}
-        MoveResult::Draw(_) => { println!("Draw!") }
+        MoveResult::WinFirstPlayer(display) => { println!("{}\nFirst player (O) wins!", display) }
+        MoveResult::WinSecondPlayer(display) => { println!("{}\nSecond player (X) wins! ", display)}
+        MoveResult::Draw(display) => { println!("{}\nDraw!",display) }
         MoveResult::IllegalMove | MoveResult::Ongoing(_) => { panic!("Impossible to reach here") }
     }
 }
