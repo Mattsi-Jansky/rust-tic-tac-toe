@@ -87,6 +87,16 @@ fn is_win_state(state: [Cell; 9]) -> bool {
         test_win_vertical(state, &mut result, i)
     }
 
+    if !matches!(state[4], Cell::None) {
+        let cell_type = state[4];
+        if state[0] == cell_type && state[8] == cell_type {
+            result = true;
+        }
+        else if state[2] == cell_type && state[6] == cell_type {
+            result = true;
+        }
+    }
+
     result
 }
 
@@ -299,5 +309,23 @@ mod tests {
                 display
             )
         } else { panic!("Expected WinSecondPlayer, got {:?}",result) }
+    }
+
+    #[test]
+    fn win_first_player_diagonal() {
+        let mut game = Game::new();
+
+        game = game.make_move(0,0).unwrap();
+        game = game.make_move(1,0).unwrap();
+        game = game.make_move(1,1).unwrap();
+        game = game.make_move(2,1).unwrap();
+        let result = game.make_move(2,2);
+
+        if let MoveResult::WinFirstPlayer(display) = result {
+            assert_eq!(
+                concat!("OX \n"," OX\n","  O"),
+                display
+            )
+        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
     }
 }
