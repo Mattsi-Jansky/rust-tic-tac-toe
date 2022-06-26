@@ -86,16 +86,7 @@ fn is_win_state(state: [Cell; 9]) -> bool {
         test_win_horizontal(&state, &mut result, i);
         test_win_vertical(state, &mut result, i)
     }
-
-    if !matches!(state[4], Cell::None) {
-        let cell_type = state[4];
-        if state[0] == cell_type && state[8] == cell_type {
-            result = true;
-        }
-        else if state[2] == cell_type && state[6] == cell_type {
-            result = true;
-        }
-    }
+    test_win_diagonal(state, &mut result);
 
     result
 }
@@ -114,6 +105,16 @@ fn test_win_vertical(state: [Cell; 9], result: &mut bool, i: usize) {
     if !matches!(state[i], Cell::None) {
         let cell_type = state[i];
         if state[i + 3] == cell_type && state[i + 6] == cell_type {
+            *result = true;
+        }
+    }
+}
+
+fn test_win_diagonal(state: [Cell; 9], result: &mut bool) {
+    if !matches!(state[4], Cell::None) {
+        let cell_type = state[4];
+        if (state[0] == cell_type && state[8] == cell_type)
+            || (state[2] == cell_type && state[6] == cell_type) {
             *result = true;
         }
     }
