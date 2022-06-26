@@ -1,8 +1,8 @@
-#[derive(Clone,Copy,Debug,PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 enum Cell {
     Nort,
     Cross,
-    None
+    None,
 }
 
 #[derive(Debug)]
@@ -11,39 +11,41 @@ pub enum MoveResult {
     IllegalMove,
     WinFirstPlayer(String),
     WinSecondPlayer(String),
-    Draw(String)
+    Draw(String),
 }
 
 impl MoveResult {
     pub fn unwrap(self) -> Game {
         match self {
-            MoveResult::Ongoing(game) => { game }
-            _ => { panic!("Cannot play from this state") }
+            MoveResult::Ongoing(game) => game,
+            _ => {
+                panic!("Cannot play from this state")
+            }
         }
     }
 }
 
-#[derive(Debug,Clone,Copy)]
+#[derive(Debug, Clone, Copy)]
 pub struct Game {
     state: [Cell; 9],
-    is_first_player_turn: bool
+    is_first_player_turn: bool,
 }
 
 impl Game {
     pub fn new() -> Game {
-            Game {
-                state: [
-                    Cell::None,
-                    Cell::None,
-                    Cell::None,
-                    Cell::None,
-                    Cell::None,
-                    Cell::None,
-                    Cell::None,
-                    Cell::None,
-                    Cell::None,
-                ],
-                is_first_player_turn: true
+        Game {
+            state: [
+                Cell::None,
+                Cell::None,
+                Cell::None,
+                Cell::None,
+                Cell::None,
+                Cell::None,
+                Cell::None,
+                Cell::None,
+                Cell::None,
+            ],
+            is_first_player_turn: true,
         }
     }
 
@@ -56,19 +58,20 @@ impl Game {
         if matches!(state[x + (y * 3)], Cell::None) {
             state[x + (y * 3)] = match self.is_first_player_turn {
                 true => Cell::Nort,
-                false => Cell::Cross
+                false => Cell::Cross,
             };
             if is_win_state(state) {
-                if self.is_first_player_turn { MoveResult::WinFirstPlayer(render_state(state)) }
-                else { MoveResult::WinSecondPlayer(render_state(state)) }
-            }
-            else if !state.contains(&Cell::None) {
+                if self.is_first_player_turn {
+                    MoveResult::WinFirstPlayer(render_state(state))
+                } else {
+                    MoveResult::WinSecondPlayer(render_state(state))
+                }
+            } else if !state.contains(&Cell::None) {
                 MoveResult::Draw(render_state(state))
-            }
-            else {
+            } else {
                 MoveResult::Ongoing(Game {
                     state,
-                    is_first_player_turn: !self.is_first_player_turn
+                    is_first_player_turn: !self.is_first_player_turn,
                 })
             }
         } else {
@@ -79,7 +82,7 @@ impl Game {
 
 impl Default for Game {
     fn default() -> Self {
-     Self::new()
+        Self::new()
     }
 }
 
@@ -118,7 +121,8 @@ fn test_win_diagonal(state: [Cell; 9], result: &mut bool) {
     if !matches!(state[4], Cell::None) {
         let cell_type = state[4];
         if (state[0] == cell_type && state[8] == cell_type)
-            || (state[2] == cell_type && state[6] == cell_type) {
+            || (state[2] == cell_type && state[6] == cell_type)
+        {
             *result = true;
         }
     }
@@ -131,10 +135,12 @@ fn render_state(state: [Cell; 9]) -> String {
         result.push_str(match cell {
             Cell::Nort => "O",
             Cell::Cross => "X",
-            Cell::None => " "
+            Cell::None => " ",
         });
 
-        if (i + 1) % 3 == 0 && i < 8 { result.push('\n')};
+        if (i + 1) % 3 == 0 && i < 8 {
+            result.push('\n')
+        };
     }
 
     result
@@ -150,58 +156,46 @@ mod tests {
 
         let actual = game.render();
 
-        assert_eq!(
-            concat!("   \n","   \n","   "),
-            actual
-        )
+        assert_eq!(concat!("   \n", "   \n", "   "), actual)
     }
 
     #[test]
     fn first_move_should_place_x_on_screen() {
         let mut game = Game::new();
 
-        game = game.make_move(0,0).unwrap();
+        game = game.make_move(0, 0).unwrap();
 
         let actual = game.render();
-        assert_eq!(
-            concat!("O  \n","   \n","   "),
-            actual
-        )
+        assert_eq!(concat!("O  \n", "   \n", "   "), actual)
     }
 
     #[test]
     fn second_move_should_place_o_on_screen() {
         let mut game = Game::new();
 
-        game = game.make_move(0,0).unwrap();
-        game = game.make_move(1,0).unwrap();
+        game = game.make_move(0, 0).unwrap();
+        game = game.make_move(1, 0).unwrap();
 
         let actual = game.render();
-        assert_eq!(
-            concat!("OX \n","   \n","   "),
-            actual
-        )
+        assert_eq!(concat!("OX \n", "   \n", "   "), actual)
     }
 
     #[test]
     fn move_on_second_row() {
         let mut game = Game::new();
 
-        game = game.make_move(0,1).unwrap();
+        game = game.make_move(0, 1).unwrap();
 
         let actual = game.render();
-        assert_eq!(
-            concat!("   \n","O  \n","   "),
-            actual
-        )
+        assert_eq!(concat!("   \n", "O  \n", "   "), actual)
     }
 
     #[test]
     fn cannot_play_in_position_already_played_in() {
         let mut game = Game::new();
 
-        game = game.make_move(0,0).unwrap();
-        let result = game.make_move(0,0);
+        game = game.make_move(0, 0).unwrap();
+        let result = game.make_move(0, 0);
 
         assert!(matches!(result, MoveResult::IllegalMove))
     }
@@ -210,186 +204,176 @@ mod tests {
     fn win_first_player_horizontal() {
         let mut game = Game::new();
 
-        game = game.make_move(0,0).unwrap();
-        game = game.make_move(0,1).unwrap();
-        game = game.make_move(1,0).unwrap();
-        game = game.make_move(1,1).unwrap();
-        let result = game.make_move(2,0);
+        game = game.make_move(0, 0).unwrap();
+        game = game.make_move(0, 1).unwrap();
+        game = game.make_move(1, 0).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        let result = game.make_move(2, 0);
 
         if let MoveResult::WinFirstPlayer(display) = result {
-            assert_eq!(
-                concat!("OOO\n","XX \n","   "),
-                display
-            )
-        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+            assert_eq!(concat!("OOO\n", "XX \n", "   "), display)
+        } else {
+            panic!("Expected WinFirstPlayer, got {:?}", result)
+        }
     }
 
     #[test]
     fn win_first_player_horizontal_second_row() {
         let mut game = Game::new();
 
-        game = game.make_move(0,1).unwrap();
-        game = game.make_move(0,0).unwrap();
-        game = game.make_move(1,1).unwrap();
-        game = game.make_move(1,0).unwrap();
-        let result = game.make_move(2,1);
+        game = game.make_move(0, 1).unwrap();
+        game = game.make_move(0, 0).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        game = game.make_move(1, 0).unwrap();
+        let result = game.make_move(2, 1);
 
         if let MoveResult::WinFirstPlayer(display) = result {
-            assert_eq!(
-                concat!("XX \n","OOO\n","   "),
-                display
-            )
-        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+            assert_eq!(concat!("XX \n", "OOO\n", "   "), display)
+        } else {
+            panic!("Expected WinFirstPlayer, got {:?}", result)
+        }
     }
 
     #[test]
     fn win_second_player_horizontal() {
         let mut game = Game::new();
 
-        game = game.make_move(0,0).unwrap();
-        game = game.make_move(0,1).unwrap();
-        game = game.make_move(1,0).unwrap();
-        game = game.make_move(1,1).unwrap();
-        game = game.make_move(2,2).unwrap();
-        let result = game.make_move(2,1);
+        game = game.make_move(0, 0).unwrap();
+        game = game.make_move(0, 1).unwrap();
+        game = game.make_move(1, 0).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        game = game.make_move(2, 2).unwrap();
+        let result = game.make_move(2, 1);
 
         if let MoveResult::WinSecondPlayer(display) = result {
-            assert_eq!(
-                concat!("OO \n","XXX\n","  O"),
-                display
-            )
-        } else { panic!("Expected WinSecondPlayer, got {:?}",result) }
+            assert_eq!(concat!("OO \n", "XXX\n", "  O"), display)
+        } else {
+            panic!("Expected WinSecondPlayer, got {:?}", result)
+        }
     }
 
     #[test]
     fn win_first_player_vertical() {
         let mut game = Game::new();
 
-        game = game.make_move(0,0).unwrap();
-        game = game.make_move(1,0).unwrap();
-        game = game.make_move(0,1).unwrap();
-        game = game.make_move(1,1).unwrap();
-        let result  = game.make_move(0,2);
+        game = game.make_move(0, 0).unwrap();
+        game = game.make_move(1, 0).unwrap();
+        game = game.make_move(0, 1).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        let result = game.make_move(0, 2);
 
         if let MoveResult::WinFirstPlayer(display) = result {
-            assert_eq!(
-                concat!("OX \n","OX \n","O  "),
-                display
-            )
-        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+            assert_eq!(concat!("OX \n", "OX \n", "O  "), display)
+        } else {
+            panic!("Expected WinFirstPlayer, got {:?}", result)
+        }
     }
 
     #[test]
     fn win_first_player_vertical_second_column() {
         let mut game = Game::new();
 
-        game = game.make_move(1,0).unwrap();
-        game = game.make_move(2,0).unwrap();
-        game = game.make_move(1,1).unwrap();
-        game = game.make_move(2,1).unwrap();
-        let result  = game.make_move(1,2);
+        game = game.make_move(1, 0).unwrap();
+        game = game.make_move(2, 0).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        game = game.make_move(2, 1).unwrap();
+        let result = game.make_move(1, 2);
 
         if let MoveResult::WinFirstPlayer(display) = result {
-            assert_eq!(
-                concat!(" OX\n"," OX\n"," O "),
-                display
-            )
-        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+            assert_eq!(concat!(" OX\n", " OX\n", " O "), display)
+        } else {
+            panic!("Expected WinFirstPlayer, got {:?}", result)
+        }
     }
 
     #[test]
     fn win_second_player_vertical() {
         let mut game = Game::new();
 
-        game = game.make_move(0,0).unwrap();
-        game = game.make_move(2,0).unwrap();
-        game = game.make_move(0,1).unwrap();
-        game = game.make_move(2,1).unwrap();
-        game = game.make_move(1,1).unwrap();
-        let result = game.make_move(2,2);
+        game = game.make_move(0, 0).unwrap();
+        game = game.make_move(2, 0).unwrap();
+        game = game.make_move(0, 1).unwrap();
+        game = game.make_move(2, 1).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        let result = game.make_move(2, 2);
 
         if let MoveResult::WinSecondPlayer(display) = result {
-            assert_eq!(
-                concat!("O X\n","OOX\n","  X"),
-                display
-            )
-        } else { panic!("Expected WinSecondPlayer, got {:?}",result) }
+            assert_eq!(concat!("O X\n", "OOX\n", "  X"), display)
+        } else {
+            panic!("Expected WinSecondPlayer, got {:?}", result)
+        }
     }
 
     #[test]
     fn win_first_player_diagonal() {
         let mut game = Game::new();
 
-        game = game.make_move(0,0).unwrap();
-        game = game.make_move(1,0).unwrap();
-        game = game.make_move(1,1).unwrap();
-        game = game.make_move(2,1).unwrap();
-        let result = game.make_move(2,2);
+        game = game.make_move(0, 0).unwrap();
+        game = game.make_move(1, 0).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        game = game.make_move(2, 1).unwrap();
+        let result = game.make_move(2, 2);
 
         if let MoveResult::WinFirstPlayer(display) = result {
-            assert_eq!(
-                concat!("OX \n"," OX\n","  O"),
-                display
-            )
-        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+            assert_eq!(concat!("OX \n", " OX\n", "  O"), display)
+        } else {
+            panic!("Expected WinFirstPlayer, got {:?}", result)
+        }
     }
 
     #[test]
     fn win_first_player_diagonal_opposite_direction() {
         let mut game = Game::new();
 
-        game = game.make_move(2,0).unwrap();
-        game = game.make_move(1,0).unwrap();
-        game = game.make_move(1,1).unwrap();
-        game = game.make_move(2,1).unwrap();
-        let result = game.make_move(0,2);
+        game = game.make_move(2, 0).unwrap();
+        game = game.make_move(1, 0).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        game = game.make_move(2, 1).unwrap();
+        let result = game.make_move(0, 2);
 
         if let MoveResult::WinFirstPlayer(display) = result {
-            assert_eq!(
-                concat!(" XO\n"," OX\n","O  "),
-                display
-            )
-        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+            assert_eq!(concat!(" XO\n", " OX\n", "O  "), display)
+        } else {
+            panic!("Expected WinFirstPlayer, got {:?}", result)
+        }
     }
 
     #[test]
     fn win_second_player_diagonal() {
         let mut game = Game::new();
 
-        game = game.make_move(1,0).unwrap();
-        game = game.make_move(0,0).unwrap();
-        game = game.make_move(2,1).unwrap();
-        game = game.make_move(1,1).unwrap();
-        game = game.make_move(1,2).unwrap();
-        let result = game.make_move(2,2);
+        game = game.make_move(1, 0).unwrap();
+        game = game.make_move(0, 0).unwrap();
+        game = game.make_move(2, 1).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        game = game.make_move(1, 2).unwrap();
+        let result = game.make_move(2, 2);
 
         if let MoveResult::WinSecondPlayer(display) = result {
-            assert_eq!(
-                concat!("XO \n"," XO\n"," OX"),
-                display
-            )
-        } else { panic!("Expected WinSecondPlayer, got {:?}",result) }
+            assert_eq!(concat!("XO \n", " XO\n", " OX"), display)
+        } else {
+            panic!("Expected WinSecondPlayer, got {:?}", result)
+        }
     }
 
     #[test]
     fn given_all_cells_filled_and_not_winstate_is_draw() {
         let mut game = Game::new();
 
-        game = game.make_move(0,0).unwrap();
-        game = game.make_move(1,0).unwrap();
-        game = game.make_move(2,0).unwrap();
-        game = game.make_move(0,1).unwrap();
-        game = game.make_move(0,2).unwrap();
-        game = game.make_move(1,1).unwrap();
-        game = game.make_move(2,1).unwrap();
-        game = game.make_move(2,2).unwrap();
-        let result = game.make_move(1,2);
+        game = game.make_move(0, 0).unwrap();
+        game = game.make_move(1, 0).unwrap();
+        game = game.make_move(2, 0).unwrap();
+        game = game.make_move(0, 1).unwrap();
+        game = game.make_move(0, 2).unwrap();
+        game = game.make_move(1, 1).unwrap();
+        game = game.make_move(2, 1).unwrap();
+        game = game.make_move(2, 2).unwrap();
+        let result = game.make_move(1, 2);
 
         if let MoveResult::Draw(display) = result {
-            assert_eq!(
-                concat!("OXO\n","XXO\n","OOX"),
-                display
-            )
-        } else { panic!("Expected Draw, got {:?}",result) }
+            assert_eq!(concat!("OXO\n", "XXO\n", "OOX"), display)
+        } else {
+            panic!("Expected Draw, got {:?}", result)
+        }
     }
 }
