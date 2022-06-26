@@ -1,6 +1,5 @@
 use std::io;
 use tic_tac_toe::{Game, MoveResult};
-use tic_tac_toe::MoveResult::Draw;
 
 fn main() {
     let mut game = Game::new();
@@ -9,20 +8,12 @@ fn main() {
 
     while matches!(result, MoveResult::Ongoing(_)) || matches!(result, MoveResult::IllegalMove)  {
         println!("{}", game.render());
-        let mut input = String::new();
-        match io::stdin().read_line(&mut input) {
-            Ok(n) => {
-                input = input.lines().last().unwrap().to_string();
-                if n != 4 || !input.contains(",") { println!("Error, bad command. Use format `x,y` eg `0,0` (zero-indexed)")}
-                else {
-                    let mut input_chars = input.chars();
-                    let x = input_chars.next().unwrap() as usize - 0x30;
-                    input_chars.next();
-                    let y = input_chars.next().unwrap() as usize - 0x30;
-                    result = game.make_move(x,y);
-                }
+        let input = parse_input();
+        match input {
+            Ok((x,y)) => {
+                result = game.make_move(x,y);
             }
-            Err(error) => println!("error: {}. Try again", error),
+            Err(error) => println!("{}",error),
         }
 
         if let MoveResult::Ongoing(new_game) = result {
@@ -38,5 +29,23 @@ fn main() {
         MoveResult::WinSecondPlayer(display) => { println!("{}\nSecond player (X) wins! ", display)}
         MoveResult::Draw(display) => { println!("{}\nDraw!",display) }
         MoveResult::IllegalMove | MoveResult::Ongoing(_) => { panic!("Impossible to reach here") }
+    }
+}
+
+fn parse_input() -> Result<(usize,usize),String> {
+    let mut input = String::new();
+    match io::stdin().read_line(&mut input) {
+        Ok(n) => {
+            input = input.lines().last().unwrap().to_string();
+            if n != 4 || !input.contains(",") { Err("Error, bad command. Use format `x,y` eg `0,0` (zero-indexed)".to_string())}
+            else {
+                let mut input_chars = input.chars();
+                let x = input_chars.next().unwrap() as usize - 0x30;
+                input_chars.next();
+                let y = input_chars.next().unwrap() as usize - 0x30;
+                Ok((x,y))
+            }
+        }
+        Err(error) => Err(format!("error: {}. Try again", error)),
     }
 }
