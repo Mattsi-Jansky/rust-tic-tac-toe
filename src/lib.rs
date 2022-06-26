@@ -73,14 +73,20 @@ impl Game {
     }
 }
 
+impl Default for Game {
+    fn default() -> Self {
+     Self::new()
+    }
+}
+
 fn is_win_state(state: [Cell; 9]) -> bool {
     let mut result = false;
 
     for i in 0..2 {
         let row = i * 3;
-        if !matches!(state[0 + row], Cell::None) {
-            let cell_type = state[0 + row];
-            if state[0 + row] == cell_type && state[1 + row] == cell_type && state[2 + row] == cell_type {
+        if !matches!(state[row], Cell::None) {
+            let cell_type = state[row];
+            if state[row] == cell_type && state[1 + row] == cell_type && state[2 + row] == cell_type {
                 result = true;
             }
         }
@@ -99,7 +105,7 @@ fn render_state(state: [Cell; 9]) -> String {
             Cell::None => " "
         });
 
-        if (i + 1) % 3 == 0 && i < 8 { result.push_str("\n")};
+        if (i + 1) % 3 == 0 && i < 8 { result.push('\n')};
     }
 
     result
