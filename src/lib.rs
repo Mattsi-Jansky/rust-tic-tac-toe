@@ -6,7 +6,7 @@ enum Cell {
 }
 
 #[derive(Debug)]
-enum MoveResult {
+pub enum MoveResult {
     Ongoing(Game),
     IllegalMove,
     WinFirstPlayer(String),
@@ -14,7 +14,7 @@ enum MoveResult {
 }
 
 impl MoveResult {
-    fn unwrap(self) -> Game {
+    pub fn unwrap(self) -> Game {
         match self {
             MoveResult::Ongoing(game) => { game }
             _ => { panic!("Cannot play from this state") }
@@ -23,7 +23,7 @@ impl MoveResult {
 }
 
 #[derive(Debug)]
-struct Game {
+pub struct Game {
     state: [Cell; 9],
     is_first_player_turn: bool
 }
