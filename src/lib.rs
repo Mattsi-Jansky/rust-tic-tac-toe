@@ -82,7 +82,7 @@ impl Default for Game {
 fn is_win_state(state: [Cell; 9]) -> bool {
     let mut result = false;
 
-    for i in 0..2 {
+    for i in 0..=2 {
         let row = i * 3;
         if !matches!(state[row], Cell::None) {
             let cell_type = state[row];
@@ -91,7 +91,9 @@ fn is_win_state(state: [Cell; 9]) -> bool {
             }
         }
 
+        println!("Testing column {}", i);
         if !matches!(state[i], Cell::None) {
+            println!("Column {} matches", i);
             let cell_type = state[i];
             if state[i+3] == cell_type && state[i + 6] == cell_type {
                 result = true;
@@ -255,5 +257,42 @@ mod tests {
                 display
             )
         } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+    }
+
+    #[test]
+    fn win_first_player_vertical_second_column() {
+        let mut game = Game::new();
+
+        game = game.make_move(1,0).unwrap();
+        game = game.make_move(2,0).unwrap();
+        game = game.make_move(1,1).unwrap();
+        game = game.make_move(2,1).unwrap();
+        let result  = game.make_move(1,2);
+
+        if let MoveResult::WinFirstPlayer(display) = result {
+            assert_eq!(
+                concat!(" OX\n"," OX\n"," O "),
+                display
+            )
+        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+    }
+
+    #[test]
+    fn win_second_player_vertical() {
+        let mut game = Game::new();
+
+        game = game.make_move(0,0).unwrap();
+        game = game.make_move(2,0).unwrap();
+        game = game.make_move(0,1).unwrap();
+        game = game.make_move(2,1).unwrap();
+        game = game.make_move(1,1).unwrap();
+        let result = game.make_move(2,2);
+
+        if let MoveResult::WinSecondPlayer(display) = result {
+            assert_eq!(
+                concat!("O X\n","OOX\n","  X"),
+                display
+            )
+        } else { panic!("Expected WinSecondPlayer, got {:?}",result) }
     }
 }
