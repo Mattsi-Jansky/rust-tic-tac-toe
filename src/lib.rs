@@ -328,4 +328,41 @@ mod tests {
             )
         } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
     }
+
+    #[test]
+    fn win_first_player_diagonal_opposite_direction() {
+        let mut game = Game::new();
+
+        game = game.make_move(2,0).unwrap();
+        game = game.make_move(1,0).unwrap();
+        game = game.make_move(1,1).unwrap();
+        game = game.make_move(2,1).unwrap();
+        let result = game.make_move(0,2);
+
+        if let MoveResult::WinFirstPlayer(display) = result {
+            assert_eq!(
+                concat!(" XO\n"," OX\n","O  "),
+                display
+            )
+        } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
+    }
+
+    #[test]
+    fn win_second_player_diagonal() {
+        let mut game = Game::new();
+
+        game = game.make_move(1,0).unwrap();
+        game = game.make_move(0,0).unwrap();
+        game = game.make_move(2,1).unwrap();
+        game = game.make_move(1,1).unwrap();
+        game = game.make_move(1,2).unwrap();
+        let result = game.make_move(2,2);
+
+        if let MoveResult::WinSecondPlayer(display) = result {
+            assert_eq!(
+                concat!("XO \n"," XO\n"," OX"),
+                display
+            )
+        } else { panic!("Expected WinSecondPlayer, got {:?}",result) }
+    }
 }
