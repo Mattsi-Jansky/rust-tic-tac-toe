@@ -1,4 +1,4 @@
-#[derive(Clone,Copy,Debug)]
+#[derive(Clone,Copy,Debug,PartialEq)]
 enum Cell {
     Nort,
     Cross,
@@ -58,7 +58,8 @@ impl Game {
                 false => Cell::Cross
             };
             if is_win_state(state) {
-                MoveResult::WinFirstPlayer(render_state(state))
+                if self.is_first_player_turn { MoveResult::WinFirstPlayer(render_state(state)) }
+                else { MoveResult::WinSecondPlayer(render_state(state)) }
             }
             else {
                 MoveResult::Ongoing(Game {
@@ -77,8 +78,11 @@ fn is_win_state(state: [Cell; 9]) -> bool {
 
     for i in 0..2 {
         let row = i * 3;
-        if matches!(state[0 + row], Cell::Nort) && matches!(state[1 + row], Cell::Nort) && matches!(state[2 + row], Cell::Nort) {
-            result = true;
+        if !matches!(state[0 + row], Cell::None) {
+            let cell_type = state[0 + row];
+            if state[0 + row] == cell_type && state[1 + row] == cell_type && state[2 + row] == cell_type {
+                result = true;
+            }
         }
     }
 
@@ -203,22 +207,22 @@ mod tests {
         } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
     }
 
-    // #[test]
-    // fn win_second_player_horizontal() {
-    //     let mut game = Game::new();
-    //
-    //     game = game.make_move(0,0).unwrap();
-    //     game = game.make_move(0,1).unwrap();
-    //     game = game.make_move(1,0).unwrap();
-    //     game = game.make_move(1,1).unwrap();
-    //     game = game.make_move(2,2).unwrap();
-    //     let result = game.make_move(2,1);
-    //
-    //     if let MoveResult::WinSecondPlayer(display) = result {
-    //         assert_eq!(
-    //             concat!("OO \n","XXX\n","  O"),
-    //             display
-    //         )
-    //     } else { panic!("Expected WinFirstPlayer, got {:?}",result) }
-    // }
+    #[test]
+    fn win_second_player_horizontal() {
+        let mut game = Game::new();
+
+        game = game.make_move(0,0).unwrap();
+        game = game.make_move(0,1).unwrap();
+        game = game.make_move(1,0).unwrap();
+        game = game.make_move(1,1).unwrap();
+        game = game.make_move(2,2).unwrap();
+        let result = game.make_move(2,1);
+
+        if let MoveResult::WinSecondPlayer(display) = result {
+            assert_eq!(
+                concat!("OO \n","XXX\n","  O"),
+                display
+            )
+        } else { panic!("Expected WinSecondPlayer, got {:?}",result) }
+    }
 }
