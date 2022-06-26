@@ -10,7 +10,8 @@ pub enum MoveResult {
     Ongoing(Game),
     IllegalMove,
     WinFirstPlayer(String),
-    WinSecondPlayer(String)
+    WinSecondPlayer(String),
+    Draw(String)
 }
 
 impl MoveResult {
@@ -60,6 +61,9 @@ impl Game {
             if is_win_state(state) {
                 if self.is_first_player_turn { MoveResult::WinFirstPlayer(render_state(state)) }
                 else { MoveResult::WinSecondPlayer(render_state(state)) }
+            }
+            else if !state.contains(&Cell::None) {
+                MoveResult::Draw(render_state(state))
             }
             else {
                 MoveResult::Ongoing(Game {
@@ -365,5 +369,27 @@ mod tests {
                 display
             )
         } else { panic!("Expected WinSecondPlayer, got {:?}",result) }
+    }
+
+    #[test]
+    fn given_all_cells_filled_and_not_winstate_is_draw() {
+        let mut game = Game::new();
+
+        game = game.make_move(0,0).unwrap();
+        game = game.make_move(1,0).unwrap();
+        game = game.make_move(2,0).unwrap();
+        game = game.make_move(0,1).unwrap();
+        game = game.make_move(0,2).unwrap();
+        game = game.make_move(1,1).unwrap();
+        game = game.make_move(2,1).unwrap();
+        game = game.make_move(2,2).unwrap();
+        let result = game.make_move(1,2);
+
+        if let MoveResult::Draw(display) = result {
+            assert_eq!(
+                concat!("OXO\n","XXO\n","OOX"),
+                display
+            )
+        } else { panic!("Expected Draw, got {:?}",result) }
     }
 }

@@ -37,6 +37,7 @@ fn main() {
     match result {
         MoveResult::WinFirstPlayer(_) => { println!("First player (O) wins!") }
         MoveResult::WinSecondPlayer(_) => { println!("Second player (X) wins! ")}
+        MoveResult::Draw(_) => { println!("Draw!") }
         MoveResult::IllegalMove | MoveResult::Ongoing(_) => { panic!("Impossible to reach here") }
     }
 }
