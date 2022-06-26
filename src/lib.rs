@@ -22,7 +22,7 @@ impl MoveResult {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone,Copy)]
 pub struct Game {
     state: [Cell; 9],
     is_first_player_turn: bool
@@ -46,7 +46,7 @@ impl Game {
         }
     }
 
-    pub fn display(&self) -> String {
+    pub fn render(&self) -> String {
         render_state(self.state)
     }
 
@@ -144,7 +144,7 @@ mod tests {
     fn should_render_blank_board() {
         let game = Game::new();
 
-        let actual = game.display();
+        let actual = game.render();
 
         assert_eq!(
             concat!("   \n","   \n","   "),
@@ -158,7 +158,7 @@ mod tests {
 
         game = game.make_move(0,0).unwrap();
 
-        let actual = game.display();
+        let actual = game.render();
         assert_eq!(
             concat!("O  \n","   \n","   "),
             actual
@@ -172,7 +172,7 @@ mod tests {
         game = game.make_move(0,0).unwrap();
         game = game.make_move(1,0).unwrap();
 
-        let actual = game.display();
+        let actual = game.render();
         assert_eq!(
             concat!("OX \n","   \n","   "),
             actual
@@ -185,7 +185,7 @@ mod tests {
 
         game = game.make_move(0,1).unwrap();
 
-        let actual = game.display();
+        let actual = game.render();
         assert_eq!(
             concat!("   \n","O  \n","   "),
             actual
