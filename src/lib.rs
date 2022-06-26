@@ -83,25 +83,30 @@ fn is_win_state(state: [Cell; 9]) -> bool {
     let mut result = false;
 
     for i in 0..=2 {
-        let row = i * 3;
-        if !matches!(state[row], Cell::None) {
-            let cell_type = state[row];
-            if state[row + 1] == cell_type && state[row + 2] == cell_type {
-                result = true;
-            }
-        }
-
-        println!("Testing column {}", i);
-        if !matches!(state[i], Cell::None) {
-            println!("Column {} matches", i);
-            let cell_type = state[i];
-            if state[i+3] == cell_type && state[i + 6] == cell_type {
-                result = true;
-            }
-        }
+        test_win_horizontal(&state, &mut result, i);
+        test_win_vertical(state, &mut result, i)
     }
 
     result
+}
+
+fn test_win_horizontal(state: &[Cell; 9], result: &mut bool, i: usize) {
+    let row = i * 3;
+    if !matches!(state[row], Cell::None) {
+        let cell_type = state[row];
+        if state[row + 1] == cell_type && state[row + 2] == cell_type {
+            *result = true;
+        }
+    }
+}
+
+fn test_win_vertical(state: [Cell; 9], result: &mut bool, i: usize) {
+    if !matches!(state[i], Cell::None) {
+        let cell_type = state[i];
+        if state[i + 3] == cell_type && state[i + 6] == cell_type {
+            *result = true;
+        }
+    }
 }
 
 fn render_state(state: [Cell; 9]) -> String {
